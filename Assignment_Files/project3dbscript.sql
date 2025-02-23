@@ -46,7 +46,6 @@ create table racewinners (
 );
 
 # populate the database tables
-
 insert into riders values ('Andy Schleck', 'Leopard-Trek', 'Luxembourg', 35,'M');
 insert into riders values ('Frank Schleck', 'Leopard-Trek','Luxembourg', 28,'M');
 insert into riders values ('Fabian Cancellara', 'SaxoBank', 'Switzerland', 58,'M');
@@ -165,9 +164,6 @@ insert into racewinners values ('Tour de France', 2021, 'Tadej Pogacar', 3414, '
 insert into racewinners values ('Rund de Flandren', 2009, 'Stuart OGrady', 253, '6:17:29');
 insert into racewinners values ('Liege-Bastogne-Liege', 1978, 'Dietrich Thurau', 256, '7:01:00');
 insert into racewinners values ('Liege-Bastogne-Liege', 1972, 'Eddy Merckx', 273, '7:11:47');
-
-
-
 
 # uncomment the following 4 lines if you want to see the results of creating and populating the database
 #select * from teams;
