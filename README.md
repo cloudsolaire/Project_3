@@ -88,3 +88,35 @@ NOTE:  Be  sure  to  label  each  screenshot.
     and the selected properties file resulting in no connection.
     > Page 15
     > Place into a folder named Credentials Mismatch Screenshot
+
+## To Do
+
+1. Make sure Java project can access external driver (.jar to use JDBC)
+2. Create a JFrame window
+3. Draw outline map for GUI
+4. Create JPanel sections
+5. Create leftTopSection, rightTopSection, middlePanel, bottomPanel
+
+Left Top Section
+1. URL Drop down sections
+2. User Dropdown sections
+3. Username and pswd background color 
+4. Connect button actions
+5. Disconnect button actions
+
+Right Top Section
+1. Figure out how query string works
+2. Clear button actions
+3. Execute button actions
+    > Running total on number of queries
+    > Running total on number of updates from queries
+
+Middle Panel
+1. Needs default status
+2. Needs status update after successful login
+
+Bottom
+1. Needs Title
+2. Needs empty table
+3. Needs clear table button
+4. Needs close app button
