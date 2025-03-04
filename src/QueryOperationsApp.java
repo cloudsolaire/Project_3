@@ -17,7 +17,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 
-public class QueryEntryApp extends JFrame implements ActionListener{
+public class QueryOperationsApp extends JFrame implements ActionListener{
     //Window variables
     private static final int WINDOW_WIDTH = 800; //Window width
     private static final int WINDOW_HEIGHT = 800; //Window heigth
@@ -33,37 +33,38 @@ public class QueryEntryApp extends JFrame implements ActionListener{
 
     //Status label variables
     private JLabel connectStatusLabel = new JLabel(); //Connection status label, changes on login
-    private boolean connectToDB = false; //Boolean connection status
-    private Connection connection; //Connection Driver object
-    private Statement statement; //SQL Statement object
-    private ResultSet resultSet; //Result Set object
-    private ResultSetMetaData metaData; //Result Set Meta Data object
+    private boolean connectToDB = false;
+    private Connection connection;
+    private Statement statement;
+    private ResultSet resultSet;
+    private ResultSetMetaData metaData;
+    private int resultRows;
     
     //Output variables
-    private final JTable queryResultTable = new JTable(); //Query results output field
-    private final JScrollPane queryScroll = new JScrollPane(queryResultTable);
+    private JTable queryResultTable = new JTable(); //Query results output field
+    private JScrollPane queryScroll = new JScrollPane(queryResultTable);
     private DefaultTableModel tableModel = new DefaultTableModel();
     private JButton resetResultsButton = new JButton(); //Clear query results field button
     private JButton closeButton = new JButton(); //Close application
     
     //User login variables
     private final JComboBox<String> urlDropdownBox = new JComboBox<>(new String[]
-    {"" ,"project3.properties", "bikedb.properties"}); //URL dropdown menu
+    {"" ,"operationslog.properties"}); //URL dropdown menu
     private final JComboBox<String> userDropdownBox = new JComboBox<>(new String[]
-    {"" ,"root.properties", "client1.properties", "client2.properties"}); //User properties dropdown menu
+    {"" ,"theaccountant.properties"}); //User properties dropdown menu
     private final JTextField userEntryField = new JTextField(USER_DETAILS_FIELD); //User entry field
     private final JPasswordField pswdEntryField = new JPasswordField(USER_DETAILS_FIELD); //Password entry field
 
     
 
-    public QueryEntryApp(){
+    public QueryOperationsApp(){
         //Creates query window
-        setTitle("SQL CLIENT APPLICATION - (JEH - CNT 4714 - SPRING 2025 - PROJECT 3)"); //Window Title
-        setSize(WINDOW_WIDTH, WINDOW_HEIGHT); //Set window size
-        setResizable(false); //Fixed window
-        setLocationRelativeTo(null); //Center window
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Close window x button
-        setLayout(new BorderLayout(10,10)); //Window layout
+        setTitle("SPECIALIZED ACCOUNTANT APPLICATION - (JEH - CNT 4714 - SPRING 2025 - PROJECT 3)");
+        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        setResizable(false);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10,10));
 
         //Creates top panel with left and right sections
         JPanel topContainer = new JPanel(new BorderLayout());
@@ -256,7 +257,7 @@ public class QueryEntryApp extends JFrame implements ActionListener{
     }
     @Override
     public void actionPerformed(ActionEvent e){
-        //Connect button -> Connects to database
+
         if (e.getSource() == connectButton){
             String url = (String) urlDropdownBox.getSelectedItem();
             String properties = (String) userDropdownBox.getSelectedItem();
@@ -340,11 +341,8 @@ public class QueryEntryApp extends JFrame implements ActionListener{
     }
 
     public String createURLStr(String url, String newURL){
-        if (url.contains("project3")){
-            newURL = "jdbc:mysql://localhost:3306/project3";
-        }
-        if (url.contains("bikedb")){
-            newURL = "jdbc:mysql://localhost:3306/bikedb";
+        if (url.contains("operationslog")){
+            newURL = "jdbc:mysql://localhost:3306/operationslog";
         }
         return newURL;
     }
@@ -352,39 +350,16 @@ public class QueryEntryApp extends JFrame implements ActionListener{
         if (!connectToDB){
             throw new IllegalStateException("NO CONNECTION FOUND!");
         }
-
-        String username = userEntryField.getText() + "@localhost";
-        System.out.println(username);
-        //Checks for specific SELECT query
-        if (query.trim().toUpperCase().startsWith("SELECT")){
-            resultSet = statement.executeQuery(query);
-            updateOperationsLog(username, true);
+        if (query.contains("select")){
+        resultSet = statement.executeQuery(query);
         }
-        //Assumes other queries INSERT,UPDATE,etc.
         else{
             int rowsAffected = statement.executeUpdate(query);
-            if (rowsAffected > 0) {
-                JOptionPane.showMessageDialog(
-                    this, 
-                    "Successful Update: " + rowsAffected + " rows updated.", 
-                    "Successful Update", 
-                    JOptionPane.INFORMATION_MESSAGE
-                );
-            } 
-            else {
-                JOptionPane.showMessageDialog(
-                    this, 
-                    "Update executed but no rows were affected.", 
-                    "Update Status", 
-                    JOptionPane.WARNING_MESSAGE
-                );
-               
-            updateOperationsLog(username, false);
-            }
         }
         metaData = resultSet.getMetaData();
 
         int resultColumns = metaData.getColumnCount();
+
         Vector<String> columnNames = new Vector<>();
         Vector<Vector<Object>> data = new Vector<>();
 
@@ -406,46 +381,9 @@ public class QueryEntryApp extends JFrame implements ActionListener{
         resultSet.last();
         resultRows = resultSet.getRow();
     }
-
-    private void updateOperationsLog(String username, boolean isSelectQuery) {
-        String opURL = "jdbc:mysql://localhost:3306/operationslog";
-        String opUser = "root";
-        String opPswd = "USERPASSWORD"; //Modified for security
-        
-        // For SELECT queries, increment only num_queries;
-        // For DELETE, INSERT, UPDATE, increment both num_queries and num_updates.
-        String sql = isSelectQuery 
-                ? "UPDATE operationscount SET num_queries = num_queries + 1 WHERE login_username = ?" 
-                : "UPDATE operationscount SET num_queries = num_queries + 1, num_updates = num_updates + 1 WHERE login_username = ?";
-        
-        try (Connection logConnection = DriverManager.getConnection(opURL, opUser, opPswd);
-             PreparedStatement ps = logConnection.prepareStatement(sql)) {
-             
-            ps.setString(1, username);
-            int rowsUpdated = ps.executeUpdate();
-            
-            // If no record exists for the user, insert a new one.
-            if (rowsUpdated == 0) {
-                String insertSQL = "INSERT INTO operationscount (login_username, num_queries, num_updates) VALUES (?, ?, ?)";
-                try (PreparedStatement psInsert = logConnection.prepareStatement(insertSQL)) {
-                    psInsert.setString(1, username);
-                    if (isSelectQuery) {
-                        psInsert.setInt(2, 1);  // 1 query executed
-                        psInsert.setInt(3, 0);  // no update executed
-                    } else {
-                        psInsert.setInt(2, 1);  // 1 query executed
-                        psInsert.setInt(3, 1);  // 1 update executed
-                    }
-                    psInsert.executeUpdate();
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
+    
     public static void main(String[] args) {
 
-        new QueryEntryApp();
+        new QueryOperationsApp();
     }
 }

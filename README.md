@@ -89,34 +89,74 @@ NOTE:  Be  sure  to  label  each  screenshot.
     > Page 15
     > Place into a folder named Credentials Mismatch Screenshot
 
-## To Do
+## To Do v 1
 
-1. Make sure Java project can access external driver (.jar to use JDBC)
-2. Create a JFrame window
-3. Draw outline map for GUI
-4. Create JPanel sections
-5. Create leftTopSection, rightTopSection, middlePanel, bottomPanel
+1. Make sure Java project can access external driver (.jar to use JDBC) DONE
+2. Create a JFrame window DONE
+3. Draw outline map for GUI DONE
+4. Create JPanel sections DONE
+5. Create leftTopSection, rightTopSection, middlePanel, bottomPanel DONE
 
 Left Top Section
-1. URL Drop down sections
-2. User Dropdown sections
-3. Username and pswd background color 
-4. Connect button actions
-5. Disconnect button actions
+1. URL Drop down sections DONE
+2. User Dropdown sections DONE
+3. Username and pswd background color DONE
+4. Connect button actions DONE
+5. Disconnect button actions DONE
 
 Right Top Section
-1. Figure out how query string works
-2. Clear button actions
-3. Execute button actions
+1. Figure out how query string works DONE
+2. Clear button actions DONE
+3. Execute button actions DONE
     > Running total on number of queries
     > Running total on number of updates from queries
 
 Middle Panel
-1. Needs default status
-2. Needs status update after successful login
+1. Needs default status DONE
+2. Needs status update after successful login DONE
 
 Bottom
-1. Needs Title
-2. Needs empty table
-3. Needs clear table button
-4. Needs close app button
+1. Needs Title DONE
+2. Needs empty table IN PROG
+3. Needs clear table button DONE
+4. Needs close app button DONE
+
+## To Do v2
+
+Top-Left Panel
+1. Find out how to check from valid list of passwords DONE
+2. Find out how to check from user properties DONE
+3. How to connect to db DONE
+4. How to disconnect from db DONE
+
+Top-Right Panel
+1. Find out how to execute a query and read correctly DONE
+2. Find out how to read from specific db DONE
+
+Middle Panel
+1. DEPENDENT ON VALID LOGIN
+    Change login status based on connection DONE
+
+Bottom Panel
+1. Find out how to make an empty table DONE
+2. Find out how to make a table based on query DONE
+
+## To Do v3
+
+No Section
+1. Change username and password fields after connectToDB = true DONE
+2. Left Align connectionStatusLabel DONE
+3. Align top labels IGNORE
+4. Begin accountant app DONE
+
+Accountant APP
+>CREATE CLASS TO STORE NUM_QUERIES AND NUM_UPDATES
+1. Create new GUI window for special user DONE
+2. Access num of updates and num queries DONE
+
+## To Do v4
+
+1. Find out how to store num_queries and num_updates DONE
+2. Store login_username during each query DONE
+3. Take screenshots
+4. Add comments to both apps
