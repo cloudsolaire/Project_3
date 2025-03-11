@@ -33,11 +33,12 @@ public class QueryEntryApp extends JFrame implements ActionListener{
 
     //Status label variables
     private JLabel connectStatusLabel = new JLabel(); //Connection status label, changes on login
-    private boolean connectToDB = false; //Boolean connection status
+    private boolean connectToDB = false; //Boolean Connection status
     private Connection connection; //Connection Driver object
     private Statement statement; //SQL Statement object
     private ResultSet resultSet; //Result Set object
-    private ResultSetMetaData metaData; //Result Set Meta Data object
+    private ResultSetMetaData metaData; //Result Set Metadata object
+    private int resultRows; //Number of rows in table
     
     //Output variables
     private final JTable queryResultTable = new JTable(); //Query results output field
@@ -81,10 +82,10 @@ public class QueryEntryApp extends JFrame implements ActionListener{
         leftTopSection.setBorder(BorderFactory.createEmptyBorder( 10, 10, 10, 10));
         
         //Left top subpanels
-        JLabel urlPropLabel = new JLabel(" DB URL Properties");
-        JLabel userPropLabel = new JLabel(" User Properties");
-        JLabel usernameLabel = new JLabel(" Username");
-        JLabel pswdLabel = new JLabel(" Password");
+        JLabel urlPropLabel = new JLabel(" DB URL Properties"); //Database label
+        JLabel userPropLabel = new JLabel(" User Properties"); //User properties label
+        JLabel usernameLabel = new JLabel(" Username"); //Username label
+        JLabel pswdLabel = new JLabel(" Password"); //Password label
 
         //User selections properties
         urlPropLabel.setBackground(Color.LIGHT_GRAY);
@@ -102,8 +103,7 @@ public class QueryEntryApp extends JFrame implements ActionListener{
         connectButton.setForeground(Color.WHITE);
         connectButton.setBackground(Color.BLUE);
         connectButton.setOpaque(true);
-        connectButton.setBorderPainted(false); // Remove default border
-        connectButton.setFocusPainted(true); // Remove focus border
+        connectButton.setBorderPainted(false);
         connectButton.setContentAreaFilled(true);
         connectButton.addActionListener(this);
 
@@ -254,6 +254,7 @@ public class QueryEntryApp extends JFrame implements ActionListener{
         //Display query window
         setVisible(true);
     }
+
     @Override
     public void actionPerformed(ActionEvent e){
         //Connect button -> Connects to database
@@ -261,15 +262,18 @@ public class QueryEntryApp extends JFrame implements ActionListener{
             String url = (String) urlDropdownBox.getSelectedItem();
             String properties = (String) userDropdownBox.getSelectedItem();
 
+            //If no database is selected
             if (urlDropdownBox.getSelectedIndex() == 0){
                 JOptionPane.showMessageDialog(this, "PLEASE SELECT A DATABASE");
             }
+            //If no user properties are selected
             if (userDropdownBox.getSelectedIndex() == 0){
                 JOptionPane.showMessageDialog(this, "PLEASE SELECT USER PROPERTIES");
             }
 
             String propFile = "src/User_Properties/" + properties; //Used if properties outside of src file
 
+            //Creates properites object to selected specific login credentials
             Properties props = new Properties();
             try(FileInputStream fileInput = new FileInputStream(propFile)){
                 props.load(fileInput);
@@ -278,10 +282,12 @@ public class QueryEntryApp extends JFrame implements ActionListener{
                 exception.printStackTrace();
                 return;
             }
+            //Assigns login credentials strings based on properties file
             String username = props.getProperty("MYSQL_DB_USERNAME");
             String password = props.getProperty("MYSQL_DB_PASSWORD");
             String newURL = createURLStr(url, "");
 
+            //Attempts to connect to database using external driver
             try{
                 connection = DriverManager.getConnection(newURL, username, password);
                 connectToDB = true;
@@ -301,6 +307,7 @@ public class QueryEntryApp extends JFrame implements ActionListener{
             }
                         
         }
+        //Disconnect button -> Disconnects from database
         else if (e.getSource() == disconnectButton){
             try {
                 if (connection != null && !connection.isClosed()){
@@ -319,9 +326,11 @@ public class QueryEntryApp extends JFrame implements ActionListener{
                 ex.printStackTrace();
             }
         }
+        //Clear button -> Clears user query field
         else if (e.getSource() == clearButton){
             queryEntryField.setText("");
         }
+        //Execute button -> Execute user query button
         else if (e.getSource() == executeButton){
             try{
                 statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -331,14 +340,17 @@ public class QueryEntryApp extends JFrame implements ActionListener{
                 queryResultTable.setModel(new DefaultTableModel());
             }
         }
+        //Reset button -> Reset query results table
         else if (e.getSource() == resetResultsButton){
             queryResultTable.setModel(new DefaultTableModel());
         }
+        //Close button -> Close application
         else if (e.getSource() == closeButton){
             System.exit(0); //Exit application
         }
     }
 
+    //Creates a URL string based on user selection
     public String createURLStr(String url, String newURL){
         if (url.contains("project3")){
             newURL = "jdbc:mysql://localhost:3306/project3";
@@ -348,22 +360,29 @@ public class QueryEntryApp extends JFrame implements ActionListener{
         }
         return newURL;
     }
+
+    //Creates a query statement based on user input
+    //  and creates a table based on results
     public void setQuery(String query) throws SQLException, IllegalStateException{
+        //Checks if a connection to a database is found
         if (!connectToDB){
             throw new IllegalStateException("NO CONNECTION FOUND!");
         }
 
+        //NOT USED IN ACCOUNTANT APP
         String username = userEntryField.getText() + "@localhost";
         System.out.println(username);
-        //Checks for specific SELECT query
+
+        //Checks if user query includes SELECT
         if (query.trim().toUpperCase().startsWith("SELECT")){
             resultSet = statement.executeQuery(query);
-            updateOperationsLog(username, true);
+            updateOperationsLog(username, true); //Updates operationslog database
         }
         //Assumes other queries INSERT,UPDATE,etc.
         else{
             int rowsAffected = statement.executeUpdate(query);
             if (rowsAffected > 0) {
+                //Displays number of rows affected by query
                 JOptionPane.showMessageDialog(
                     this, 
                     "Successful Update: " + rowsAffected + " rows updated.", 
@@ -372,6 +391,7 @@ public class QueryEntryApp extends JFrame implements ActionListener{
                 );
             } 
             else {
+                //Displays update status
                 JOptionPane.showMessageDialog(
                     this, 
                     "Update executed but no rows were affected.", 

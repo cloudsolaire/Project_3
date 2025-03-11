@@ -1,7 +1,7 @@
 /*
     Name: Jessica Hernandez
     Course: CNT 4714 Spring 2025
-    Assignment title: Project 3 – A Two-tier Client-Server Application
+    Assignment title: Project 3 – A Specialized Accountant Application
     Date: March 14, 2025
     Class: Enterprise Computing
 */
@@ -33,16 +33,16 @@ public class QueryOperationsApp extends JFrame implements ActionListener{
 
     //Status label variables
     private JLabel connectStatusLabel = new JLabel(); //Connection status label, changes on login
-    private boolean connectToDB = false;
-    private Connection connection;
-    private Statement statement;
-    private ResultSet resultSet;
-    private ResultSetMetaData metaData;
-    private int resultRows;
+    private boolean connectToDB = false; //Boolean Connection status
+    private Connection connection; //Connection Driver object
+    private Statement statement; //SQL Statement object
+    private ResultSet resultSet; //Result Set object
+    private ResultSetMetaData metaData; //Result Set Metadata object
+    private int resultRows; //Number of rows in table
     
     //Output variables
-    private JTable queryResultTable = new JTable(); //Query results output field
-    private JScrollPane queryScroll = new JScrollPane(queryResultTable);
+    private final JTable queryResultTable = new JTable(); //Query results output field
+    private final JScrollPane queryScroll = new JScrollPane(queryResultTable);
     private DefaultTableModel tableModel = new DefaultTableModel();
     private JButton resetResultsButton = new JButton(); //Clear query results field button
     private JButton closeButton = new JButton(); //Close application
@@ -55,16 +55,14 @@ public class QueryOperationsApp extends JFrame implements ActionListener{
     private final JTextField userEntryField = new JTextField(USER_DETAILS_FIELD); //User entry field
     private final JPasswordField pswdEntryField = new JPasswordField(USER_DETAILS_FIELD); //Password entry field
 
-    
-
     public QueryOperationsApp(){
         //Creates query window
         setTitle("SPECIALIZED ACCOUNTANT APPLICATION - (JEH - CNT 4714 - SPRING 2025 - PROJECT 3)");
-        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        setResizable(false);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout(10,10));
+        setSize(WINDOW_WIDTH, WINDOW_HEIGHT); //Set window size
+        setResizable(false); //Fixed window
+        setLocationRelativeTo(null); //Center window
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Close window x button
+        setLayout(new BorderLayout(10,10)); //Window layout
 
         //Creates top panel with left and right sections
         JPanel topContainer = new JPanel(new BorderLayout());
@@ -82,10 +80,10 @@ public class QueryOperationsApp extends JFrame implements ActionListener{
         leftTopSection.setBorder(BorderFactory.createEmptyBorder( 10, 10, 10, 10));
         
         //Left top subpanels
-        JLabel urlPropLabel = new JLabel(" DB URL Properties");
-        JLabel userPropLabel = new JLabel(" User Properties");
-        JLabel usernameLabel = new JLabel(" Username");
-        JLabel pswdLabel = new JLabel(" Password");
+        JLabel urlPropLabel = new JLabel(" DB URL Properties"); //Database label
+        JLabel userPropLabel = new JLabel(" User Properties"); //User properties label
+        JLabel usernameLabel = new JLabel(" Username"); //Username label
+        JLabel pswdLabel = new JLabel(" Password"); //Password label
 
         //User selections properties
         urlPropLabel.setBackground(Color.LIGHT_GRAY);
@@ -255,22 +253,26 @@ public class QueryOperationsApp extends JFrame implements ActionListener{
         //Display query window
         setVisible(true);
     }
+
     @Override
     public void actionPerformed(ActionEvent e){
-
+        //Connect button -> Connects to database
         if (e.getSource() == connectButton){
             String url = (String) urlDropdownBox.getSelectedItem();
             String properties = (String) userDropdownBox.getSelectedItem();
 
+            //If no database is selected
             if (urlDropdownBox.getSelectedIndex() == 0){
                 JOptionPane.showMessageDialog(this, "PLEASE SELECT A DATABASE");
             }
+            //if no user properties are selected
             if (userDropdownBox.getSelectedIndex() == 0){
                 JOptionPane.showMessageDialog(this, "PLEASE SELECT USER PROPERTIES");
             }
 
             String propFile = "src/User_Properties/" + properties; //Used if properties outside of src file
 
+            //Creates properties object to selected specific login credentials
             Properties props = new Properties();
             try(FileInputStream fileInput = new FileInputStream(propFile)){
                 props.load(fileInput);
@@ -279,10 +281,12 @@ public class QueryOperationsApp extends JFrame implements ActionListener{
                 exception.printStackTrace();
                 return;
             }
+            //Assigns login credentials strings based on properties file
             String username = props.getProperty("MYSQL_DB_USERNAME");
             String password = props.getProperty("MYSQL_DB_PASSWORD");
             String newURL = createURLStr(url, "");
 
+            //Attempts to connect to database using external driver
             try{
                 connection = DriverManager.getConnection(newURL, username, password);
                 connectToDB = true;
@@ -302,6 +306,7 @@ public class QueryOperationsApp extends JFrame implements ActionListener{
             }
                         
         }
+        //Disconnect button -> Disconnects from database
         else if (e.getSource() == disconnectButton){
             try {
                 if (connection != null && !connection.isClosed()){
@@ -320,9 +325,11 @@ public class QueryOperationsApp extends JFrame implements ActionListener{
                 ex.printStackTrace();
             }
         }
+        //Clear button -> Clears user query field
         else if (e.getSource() == clearButton){
             queryEntryField.setText("");
         }
+        //Execute button -> Execute user query button
         else if (e.getSource() == executeButton){
             try{
                 statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -332,34 +339,42 @@ public class QueryOperationsApp extends JFrame implements ActionListener{
                 queryResultTable.setModel(new DefaultTableModel());
             }
         }
+        //Reset button -> Reset query results table
         else if (e.getSource() == resetResultsButton){
             queryResultTable.setModel(new DefaultTableModel());
         }
+        //Close button -> Close application
         else if (e.getSource() == closeButton){
             System.exit(0); //Exit application
         }
     }
 
+    //Creates a URL string based on user selection
     public String createURLStr(String url, String newURL){
         if (url.contains("operationslog")){
             newURL = "jdbc:mysql://localhost:3306/operationslog";
         }
         return newURL;
     }
+
+    //Creates a query statement based on user input
+    //  and creates a table based on results
     public void setQuery(String query) throws SQLException, IllegalStateException{
+        //Checks if a connection to a database is found
         if (!connectToDB){
             throw new IllegalStateException("NO CONNECTION FOUND!");
         }
+        //Checks if user query includes SELECT
         if (query.contains("select")){
-        resultSet = statement.executeQuery(query);
+            resultSet = statement.executeQuery(query);
         }
+        //Assumes other queries INSERT,UPDATE,etc.
         else{
             int rowsAffected = statement.executeUpdate(query);
         }
         metaData = resultSet.getMetaData();
 
         int resultColumns = metaData.getColumnCount();
-
         Vector<String> columnNames = new Vector<>();
         Vector<Vector<Object>> data = new Vector<>();
 

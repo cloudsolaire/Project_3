@@ -160,3 +160,8 @@ Accountant APP
 2. Store login_username during each query DONE
 3. Take screenshots
 4. Add comments to both apps
+
+## Final Comments
+
+- Could update leaking "this"
+- Update to list from vector
